@@ -28,8 +28,9 @@ if uploaded_file is not None:
         documents = loader.load()
         st.success(f"Loaded {len(documents)} document(s). Splitting text...")
 
-        # Set Groq API key directly in code (not recommended for production)
-        os.environ["GROQ_API_KEY"] = "***REMOVED***"
+
+    # Read Groq API key from environment
+    api_key = os.getenv("GROQ_API_KEY")
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         docs = text_splitter.split_documents(documents)
@@ -40,7 +41,7 @@ if uploaded_file is not None:
         st.success("Embeddings created. Setting up retriever and LLM...")
 
         retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})
-        llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+    llm = ChatGroq(model="llama3-8b-8192", temperature=0, api_key=api_key)
         qa_chain = RetrievalQA.from_chain_type(
             llm=llm,
             retriever=retriever,
