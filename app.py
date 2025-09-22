@@ -19,7 +19,7 @@ if 'chat_history' not in st.session_state:
 uploaded_file = st.file_uploader("Upload a PDF document", type=["pdf"])
 
 if uploaded_file is not None:
-    try:
+    
         st.info("Saving uploaded PDF...")
         with open("temp_uploaded.pdf", "wb") as f:
             f.write(uploaded_file.read())
@@ -28,8 +28,9 @@ if uploaded_file is not None:
         documents = loader.load()
         st.success(f"Loaded {len(documents)} document(s). Splitting text...")
 
-        # Set Groq API key directly in code (not recommended for production)
-        os.environ["GROQ_API_KEY"] = "***REMOVED***"
+
+    # Read Groq API key from environment
+    api_key = os.getenv("GROQ_API_KEY")
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         docs = text_splitter.split_documents(documents)
@@ -40,7 +41,7 @@ if uploaded_file is not None:
         st.success("Embeddings created. Setting up retriever and LLM...")
 
         retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})
-        llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
+    llm = ChatGroq(model="llama3-8b-8192", temperature=0, api_key=api_key)
         qa_chain = RetrievalQA.from_chain_type(
             llm=llm,
             retriever=retriever,
@@ -64,7 +65,6 @@ if uploaded_file is not None:
                 answer = response["result"]
                 st.session_state.chat_history.append((user_input, answer))
                 st.rerun()
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+    
 else:
     st.info("Please upload a PDF to get started.")
