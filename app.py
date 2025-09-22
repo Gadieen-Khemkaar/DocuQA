@@ -19,7 +19,7 @@ if 'chat_history' not in st.session_state:
 uploaded_file = st.file_uploader("Upload a PDF document", type=["pdf"])
 
 if uploaded_file is not None:
-    try:
+    
         st.info("Saving uploaded PDF...")
         with open("temp_uploaded.pdf", "wb") as f:
             f.write(uploaded_file.read())
@@ -65,7 +65,6 @@ if uploaded_file is not None:
                 answer = response["result"]
                 st.session_state.chat_history.append((user_input, answer))
                 st.rerun()
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+    
 else:
     st.info("Please upload a PDF to get started.")
